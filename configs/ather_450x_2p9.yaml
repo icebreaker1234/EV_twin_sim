@@ -1,0 +1,27 @@
+extends: base.yaml
+
+meta:
+  name: Ather 450X
+  variant: 2.9 kWh
+  notes: Public specs; ESTIMATED fields calibrated in the validation phase.
+
+vehicle:
+  vehicle_mass_kg: 108.0       # published kerb weight
+  wheel_radius_m: 0.23         # estimated from 100/80-12 rear tyre
+  drivetrain_ratio: 7.0        # ESTIMATED, calibrate to 0-40 km/h claim
+
+motor:
+  peak_torque_nm: 26.0         # published
+  peak_power_w: 6400.0         # published
+  max_rpm: 7500.0              # ESTIMATED
+
+battery:
+  energy_kwh: 2.9              # published
+  nominal_voltage_v: 50.4      # ESTIMATED
+  internal_resistance_ohm: 0.050   # ESTIMATED
+  min_voltage_v: 42.0          # ESTIMATED
+
+claimed:
+  top_speed_kmph: 90.0
+  accel_0_40_s: 3.3
+  range_km_idc: 126.0

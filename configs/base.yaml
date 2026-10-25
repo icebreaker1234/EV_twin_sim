@@ -1,0 +1,23 @@
+dt_s: 0.01                     # 100 Hz fixed step
+
+vehicle:
+  rider_mass_kg: 70.0
+  frontal_area_m2: 0.60        # ESTIMATED (scooter + rider)
+  drag_coeff: 0.75             # ESTIMATED, upright rider
+  rolling_resistance: 0.015    # ESTIMATED
+  air_density: 1.20
+  gravity: 9.81
+  drivetrain_efficiency: 0.95  # ESTIMATED
+  rotating_inertia_kgm2: 0.05  # ESTIMATED
+
+motor:
+  efficiency: 0.92             # ESTIMATED, flat until an efficiency map exists
+
+battery:
+  initial_soc: 0.95
+
+controller:                    # research knobs; same baseline for every vehicle
+  latency_s: 0.05
+  torque_ramp_nm_per_s: 400.0
+  filter_tau_s: 0.02
+  throttle_map_exponent: 1.0

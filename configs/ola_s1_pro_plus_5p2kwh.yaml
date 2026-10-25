@@ -1,0 +1,20 @@
+extends: ola_s1_pro_4kwh.yaml
+
+meta:
+  name: Ola S1 Pro
+  variant: Plus 5.2 kWh
+
+vehicle:
+  vehicle_mass_kg: 118.0       # published kerb weight
+
+motor:
+  peak_power_w: 13000.0        # published
+  max_rpm: 6200.0              # ESTIMATED
+
+battery:
+  energy_kwh: 5.2              # published
+
+claimed:
+  top_speed_kmph: 141.0
+  accel_0_40_s: 2.7
+  range_km_idc: 320.0

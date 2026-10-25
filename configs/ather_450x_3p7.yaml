@@ -1,0 +1,14 @@
+extends: ather_450x_2p9.yaml
+
+meta:
+  name: Ather 450X
+  variant: 3.7 kWh
+
+vehicle:
+  vehicle_mass_kg: 111.6       # published kerb weight
+
+battery:
+  energy_kwh: 3.7              # published
+
+claimed:
+  range_km_idc: 161.0

@@ -1,0 +1,27 @@
+extends: base.yaml
+
+meta:
+  name: Ola S1 Pro
+  variant: 4 kWh (Gen 2)
+  notes: Public specs; ESTIMATED fields calibrated in the validation phase.
+
+vehicle:
+  vehicle_mass_kg: 116.0       # published kerb weight
+  wheel_radius_m: 0.23         # estimated from 90/90-12 tyre
+  drivetrain_ratio: 3.5        # ESTIMATED, calibrate to 0-40 km/h claim
+
+motor:
+  peak_torque_nm: 58.0         # published
+  peak_power_w: 11000.0        # published (peak, not continuous)
+  max_rpm: 5500.0              # ESTIMATED
+
+battery:
+  energy_kwh: 4.0              # published
+  nominal_voltage_v: 52.0      # ESTIMATED
+  internal_resistance_ohm: 0.040   # ESTIMATED
+  min_voltage_v: 40.0          # ESTIMATED
+
+claimed:
+  top_speed_kmph: 120.0
+  accel_0_40_s: 2.6
+  # range_km_idc: add after checking Ola's current published figure
