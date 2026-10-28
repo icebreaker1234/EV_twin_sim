@@ -21,3 +21,10 @@ controller:                    # research knobs; same baseline for every vehicle
   torque_ramp_nm_per_s: 400.0
   filter_tau_s: 0.02
   throttle_map_exponent: 1.0
+
+rider_body:                    # lumped upper body on the seat; all ESTIMATED from biomechanics ranges
+  torso_mass_fraction: 0.55    # trunk + head + part of the arms (the hands are on the bars)
+  torso_com_height_m: 0.30     # hips to the lumped centre of mass
+  head_height_m: 0.60          # hips to head
+  natural_freq_hz: 1.5         # seated fore-aft trunk response is roughly 1-3 Hz
+  damping_ratio: 0.30

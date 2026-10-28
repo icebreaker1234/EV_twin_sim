@@ -6,3 +6,4 @@ pyarrow
 pyyaml
 pydantic
 pytest
+psycopg2-binary

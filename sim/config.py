@@ -96,6 +96,28 @@ class ControllerParams(_Frozen):
     throttle_map_exponent: float = Field(gt=0.2, lt=4)
 
 
+class RiderBodyParams(_Frozen):
+    """Rider upper body as an inverted pendulum pivoting at the hips.
+
+    The pelvis is fixed to the seat and the feet to the floorboard; the torso,
+    head and arms (one lumped mass) lean back when the scooter accelerates and
+    are held up by a torsional spring-damper (trunk muscles, hands on the bars).
+    The spring is specified by its natural frequency and damping ratio, which is
+    easier to reason about than a stiffness in Nm/rad.
+    """
+    torso_mass_fraction: float = Field(gt=0.2, lt=0.8)   # share of rider mass above the hips
+    torso_com_height_m: float = Field(gt=0.1, lt=0.6)    # hips to lumped centre of mass
+    head_height_m: float = Field(gt=0.2, lt=0.9)         # hips to head
+    natural_freq_hz: float = Field(gt=0.3, lt=8.0)       # of the torso on its spring-damper
+    damping_ratio: float = Field(ge=0.0, lt=2.0)
+
+    @model_validator(mode="after")
+    def _check_geometry(self) -> "RiderBodyParams":
+        if self.head_height_m <= self.torso_com_height_m:
+            raise ValueError("head_height_m must be above torso_com_height_m")
+        return self
+
+
 class Claimed(_Frozen):
     """Manufacturer claims, used as validation targets (not as inputs)."""
     top_speed_kmph: Optional[float] = None
@@ -110,7 +132,15 @@ class SimConfig(_Frozen):
     motor: MotorParams
     battery: BatteryParams
     controller: ControllerParams
+    rider_body: RiderBodyParams
     claimed: Claimed = Claimed()
+
+    @model_validator(mode="after")
+    def _check_rider_stable(self) -> "SimConfig":
+        # Explicit integration of the torso needs omega_n * dt well below 1.
+        if 2 * math.pi * self.rider_body.natural_freq_hz * self.dt_s > 0.5:
+            raise ValueError("rider natural frequency too high for this time step")
+        return self
 
     def fingerprint(self) -> str:
         """Short stable hash of the full config, to tag runs in the database."""
