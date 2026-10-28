@@ -1,0 +1,1030 @@
+{
+  "uid": "ev-overview",
+  "title": "EV Digital Twin: Overview",
+  "tags": [
+    "ev",
+    "simulation"
+  ],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "time": {
+    "from": "2000-01-01T00:00:00.000Z",
+    "to": "2000-01-01T00:03:20.000Z"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**EV digital twin: Ather 450X vs Ola S1 Pro.** Pick a scenario and compare vehicles and controller settings. Time axis = seconds since the scenario started (shown as 00:00:SS); adjust the time range for short or long scenarios. Data is simulated; values marked ESTIMATED in the configs are not yet calibrated."
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Speed vs target",
+      "description": "Closed-loop scenarios show the speed target; open-loop ones (launch, throttle step) have none.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.speed_ms * 3.6 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "B",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, 'target' AS metric, t.target_ms * 3.6 AS value FROM ev.telemetry t WHERE t.run_id = (SELECT run_id FROM ev.runs WHERE scenario = '$scenario' ORDER BY run_id LIMIT 1) AND t.target_ms IS NOT NULL ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocitykmh",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Acceleration",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.accel_ms2 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accMS2",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Jerk",
+      "description": "Rate of change of acceleration: the ride-comfort metric.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.jerk_ms3 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: m/s\u00b3",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Torque: command vs delivered",
+      "description": "Delivered torque falls below the command only when the battery limits power.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' cmd' AS metric, t.torque_cmd_nm AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "B",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' actual' AS metric, t.torque_nm AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: Nm",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Pedal (throttle)",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.pedal AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0,
+            "axisSoftMax": 1.0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Power: motor shaft vs battery",
+      "description": "Battery power exceeds shaft power by motor and inverter losses.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' shaft' AS metric, t.torque_nm * t.motor_rpm * 2 * PI() / 60.0 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "B",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' battery' AS metric, t.batt_power_w AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Rider: torso lean",
+      "description": "Backward lean of the rider's torso (spring-damper at the hips). Body parameters are ESTIMATED from biomechanics ranges.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.torso_lean_deg AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: \u00b0",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Rider: head vs scooter acceleration",
+      "description": "The head's acceleration rings around the scooter's because the torso is a spring.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 27,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' scooter' AS metric, t.accel_ms2 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "B",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' head' AS metric, t.head_accel_ms2 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "accMS2",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Rider: head vs scooter jerk",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 27,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' scooter' AS metric, t.jerk_ms3 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "B",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl || ' head' AS metric, t.head_jerk_ms3 AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: m/s\u00b3",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Battery voltage",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.batt_voltage_v AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Battery current",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 35,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.batt_current_a AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "State of charge",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 35,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT TIMESTAMPTZ '2000-01-01 00:00:00+00' + t.t_s * INTERVAL '1 second' AS time, r.vehicle_name || ' | ' || r.ctrl AS metric, t.soc AS value FROM ev.telemetry t JOIN ev.runs r ON r.run_id = t.run_id WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true,
+            "fillOpacity": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Run summary",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 42,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT r.vehicle_name AS \"Vehicle\", r.ctrl AS \"Controller\", r.t_0_40_s AS \"0-40 km/h (s)\", r.top_speed_kmph AS \"Top speed (km/h)\", r.wh_per_km AS \"Wh/km\", r.energy_wh AS \"Energy (Wh)\", r.p95_jerk_ms3 AS \"p95 |jerk|\", r.rms_jerk_ms3 AS \"RMS jerk\", r.peak_jerk_ms3 AS \"Peak jerk\", r.peak_accel_ms2 AS \"Peak accel\", r.peak_lean_deg AS \"Peak lean (deg)\", r.jerk_gain AS \"Jerk gain\", r.distance_m AS \"Distance (m)\" FROM ev.runs r WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY r.vehicle_name, r.ctrl"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 15,
+      "type": "barchart",
+      "title": "Jerk by vehicle and controller setting",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT r.vehicle_name || ' | ' || r.ctrl AS run, r.p95_jerk_ms3 AS \"p95\", r.rms_jerk_ms3 AS \"rms\", r.peak_jerk_ms3 AS \"peak\" FROM ev.runs r WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: m/s\u00b3"
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "run",
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "type": "barchart",
+      "title": "Energy consumption (Wh/km)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 51,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT r.vehicle_name || ' | ' || r.ctrl AS run, r.wh_per_km AS \"Wh/km\" FROM ev.runs r WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) AND r.wh_per_km IS NOT NULL ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: Wh/km"
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "run",
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": "barchart",
+      "title": "Peak torso lean (deg)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 60,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT r.vehicle_name || ' | ' || r.ctrl AS run, r.peak_lean_deg AS \"lean\" FROM ev.runs r WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) AND r.peak_lean_deg IS NOT NULL ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: \u00b0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "run",
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "type": "barchart",
+      "title": "Jerk gain: head RMS jerk / scooter RMS jerk",
+      "description": "Above 1 the rider's body amplifies the scooter's jerk.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ev-timescale"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 60,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "ev-timescale"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT r.vehicle_name || ' | ' || r.ctrl AS run, r.jerk_gain AS \"gain\" FROM ev.runs r WHERE r.scenario = '$scenario' AND r.vehicle_name IN ($vehicle) AND r.ctrl IN ($ctrl) AND r.jerk_gain IS NOT NULL ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "run",
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "scenario",
+        "label": "Scenario",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ev-timescale"
+        },
+        "query": "SELECT DISTINCT scenario FROM ev.runs ORDER BY 1",
+        "definition": "SELECT DISTINCT scenario FROM ev.runs ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "allValue": null,
+        "options": [],
+        "current": {
+          "text": "urban_stopgo",
+          "value": "urban_stopgo"
+        }
+      },
+      {
+        "name": "vehicle",
+        "label": "Vehicle",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ev-timescale"
+        },
+        "query": "SELECT DISTINCT vehicle_name FROM ev.runs WHERE scenario = '$scenario' ORDER BY 1",
+        "definition": "SELECT DISTINCT vehicle_name FROM ev.runs WHERE scenario = '$scenario' ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": null,
+        "options": [],
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "ctrl",
+        "label": "Controller settings",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ev-timescale"
+        },
+        "query": "SELECT DISTINCT ctrl FROM ev.runs WHERE scenario = '$scenario' AND vehicle_name IN ($vehicle) ORDER BY 1",
+        "definition": "SELECT DISTINCT ctrl FROM ev.runs WHERE scenario = '$scenario' AND vehicle_name IN ($vehicle) ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": null,
+        "options": [],
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": []
+}

@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: EV TimescaleDB
+    uid: ev-timescale
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    user: ev
+    isDefault: true
+    jsonData:
+      database: ev
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    secureJsonData:
+      password: ev

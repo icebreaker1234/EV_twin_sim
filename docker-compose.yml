@@ -1,0 +1,41 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: ev-timescaledb
+    environment:
+      POSTGRES_USER: ev
+      POSTGRES_PASSWORD: ev
+      POSTGRES_DB: ev
+    ports:
+      - "5442:5432"
+    volumes:
+      - tsdata:/var/lib/postgresql/data
+      # Creates the ev schema, tables and hypertable on first start.
+      - ./pipeline/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ev -d ev"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: ev-grafana
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: dark
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/ev_overview.json
+    ports:
+      - "3030:3000"
+    volumes:
+      - grafanadata:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+volumes:
+  tsdata:
+  grafanadata:
